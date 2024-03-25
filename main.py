@@ -2,6 +2,8 @@ from tkinter import *
 from PIL import ImageTk
 import time
 from tkinter import ttk
+from tkinter import messagebox
+
 
 def add_book():
   add_window=Toplevel()
@@ -25,12 +27,12 @@ def add_book():
   PubEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
   PubEntry.grid(row=3, column=1, padx=10, pady=15)
 
-  PubyLabel = Label(add_window, text='Publisher', font=('times new roman', 20, 'bold'))
+  PubyLabel = Label(add_window, text='Publish Year', font=('times new roman', 20, 'bold'))
   PubyLabel.grid(padx=30, pady=15)
   PubyEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
   PubyEntry.grid(row=4, column=1, padx=10, pady=15)
 
-  CopiesLabel = Label(add_window, text=' Copies', font=('times new roman', 20, 'bold'))
+  CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
   CopiesLabel.grid(padx=30, pady=15)
   CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
   CopiesEntry.grid(row=5, column=1, padx=10, pady=15)
@@ -74,7 +76,7 @@ text=''
 
 def slider():
     global text, count
-    if count<=len(s):
+    if count<len(s):
         text=text+s[count]
         sliderLabel.config(text=text)
         count+=1
@@ -94,25 +96,25 @@ logoLabel=Label(leftFrame, image=logo_image)
 logoLabel.grid(row=0, column=0)
 
 #(buttons)
-addButton_PlaceOrder=Button(leftFrame,text='Place Order')
+addButton_PlaceOrder=Button(leftFrame, text='Place Order', cursor='hand2')
 addButton_PlaceOrder.grid(row=1, column=0, padx=100, pady=20)
 
-addButton_ReturnBooks=Button(leftFrame,text='Return Books')
+addButton_ReturnBooks=Button(leftFrame, text='Return Books', cursor='hand2')
 addButton_ReturnBooks.grid(row=2, column=0, pady=20)
 
-addButton_Viewall=Button(leftFrame,text='View All Available Books')
+addButton_Viewall=Button(leftFrame, text='View All Available Books', cursor='hand2')
 addButton_Viewall.grid(row=3, column=0, pady=20)
 
-addButton_Search=Button(leftFrame,text='Search')
+addButton_Search=Button(leftFrame, text='Search', cursor='hand2')
 addButton_Search.grid(row=4, column=0, pady=20)
 
-addButton_Overdue=Button(leftFrame,text='Overdue Orders')
+addButton_Overdue=Button(leftFrame, text='Overdue Orders', cursor='hand2')
 addButton_Overdue.grid(row=5, column=0, pady=20)
 
-addButton_add=Button(leftFrame,text='Add New Books', command=add_book)
+addButton_add=Button(leftFrame, text='Add New Books', cursor='hand2', command=add_book)
 addButton_add.grid(row=6, column=0, pady=20)
 
-addButton_del=Button(leftFrame,text='Delete Books')
+addButton_del=Button(leftFrame, text='Delete Books', cursor='hand2')
 addButton_del.grid(row=7, column=0, pady=20)
 
 #Right Frame
@@ -155,5 +157,43 @@ bookTable.heading('Rental Price',text='Rental Price')
 
 
 bookTable.config(show='headings')
+
+#Login Buttom
+def connect_database():
+
+    # Login_command
+    def login():
+        if usernameEntry.get() == '' or passwordEntry.get() == '':
+            messagebox.showerror('Error', 'Fields cannot be empty')
+        elif usernameEntry.get() == 'Chen_Jack' and passwordEntry.get() == '123456':
+            messagebox.showinfo('Success', 'LOGGED IN')
+        else:
+            messagebox.showerror('Error', 'Please enter the correct username or password')
+
+    connectWindow=Toplevel()
+    connectWindow.geometry('470x200+530+230')
+    connectWindow.title('Login To Database')
+    connectWindow.resizable(0,0)
+
+    usernameLabel = Label(connectWindow, text='User Name', font=('arial', 20, 'bold'))
+    usernameLabel.grid(row=0, column=0, padx=20)
+
+    usernameEntry = Entry(connectWindow, font=('roman', 15, 'bold'), bd=2)
+    usernameEntry.grid(row=0, column=1, padx=40, pady=20)
+
+    passwordLabel = Label(connectWindow, text='Password', font=('arial', 20, 'bold'))
+    passwordLabel.grid(row=1, column=0, padx=20)
+
+    passwordEntry = Entry(connectWindow, font=('roman', 15, 'bold'), bd=2)
+    passwordEntry.grid(row=1, column=1, padx=40, pady=20)
+
+    connectButtom = ttk.Button(connectWindow, text='LOGIN', cursor='hand2', command=login)
+    connectButtom.grid(row=5, columnspan=2)
+
+connectButtom = Button(window, text='Login', command=connect_database, width=8, height=2, fg='white',
+                       bg = 'cornflowerblue', activebackground='cornflowerblue', activeforeground='white',
+                       cursor='hand2')
+connectButtom.place(x=1050, y=30)
+
 
 window.mainloop()
