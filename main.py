@@ -40,8 +40,6 @@ def add_book():
                 datalist=list(data)
                 bookTable.insert('', END, values=datalist)
 
-
-
     add_window=Toplevel()
     add_window.grab_set()
     isbnLabel=Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
@@ -86,6 +84,69 @@ def add_book():
 
     add_book_button=Button(add_window, text='Add Book', command=add_data)
     add_book_button.grid(row=8,columnspan=2,pady=15)
+
+def del_book():
+    def del_data():
+        if isbnEntry.get() == '' or CopiesEntry.get() == '':
+            messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+        else:
+            try:
+                # Check if the book with the given ISBN exists
+                query_select = 'SELECT * FROM books WHERE isbn = %s'
+                mycursor.execute(query_select, (isbnEntry.get(),))
+                book = mycursor.fetchone()
+                if book is None:
+                    messagebox.showerror('Error', 'Book not found with provided ISBN', parent=add_window)
+                else:
+                    # Delete the book record
+                    query_delete = 'DELETE FROM books WHERE isbn = %s'
+                    mycursor.execute(query_delete, (isbnEntry.get(),))
+
+                    # Update the number of copies available
+                    new_copies = int(book[5]) - int(CopiesEntry.get())  # Subtracting the copies to delete
+                    if new_copies < 0:
+                        messagebox.showerror('Error', 'Number of copies to delete exceeds available copies', parent=add_window)
+                        return
+
+                    query_update = 'UPDATE books SET copies_available = %s WHERE isbn = %s'
+                    mycursor.execute(query_update, (new_copies, isbnEntry.get()))
+
+                    con.commit()
+
+                    result = messagebox.askyesno('Data deleted successfully. Do you want to clear the form', parent=add_window)
+                    if result:
+                        isbnEntry.delete(0, END)
+                        CopiesEntry.delete(0, END)
+                    else:
+                        pass
+
+                    # Refresh the book table display
+                    query = 'SELECT * FROM books'
+                    mycursor.execute(query)
+                    fetchedData = mycursor.fetchall()
+                    bookTable.delete(*bookTable.get_children())
+                    for data in fetchedData:
+                        datalist = list(data)
+                        bookTable.insert('', END, values=datalist)
+
+            except Exception as e:
+                messagebox.showerror('Error', str(e), parent=add_window)
+
+    add_window = Toplevel()
+    add_window.grab_set()
+
+    isbnLabel = Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
+    isbnLabel.grid(padx=30, pady=15)
+    isbnEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    isbnEntry.grid(row=0, column=1, padx=10, pady=15)
+
+    CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
+    CopiesLabel.grid(padx=30, pady=15)
+    CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    CopiesEntry.grid(row=1, column=1, padx=10, pady=15)
+
+    del_book_button = Button(add_window, text='Delete Book', command=del_data)
+    del_book_button.grid(row=2, columnspan=2, pady=15)
 
 window = Tk()
 
@@ -156,7 +217,7 @@ addButton_Overdue.grid(row=5, column=0, pady=20)
 addButton_add=Button(leftFrame, text='Add New Books', cursor='hand2', command=add_book, state=DISABLED)
 addButton_add.grid(row=6, column=0, pady=20)
 
-addButton_del=Button(leftFrame, text='Delete Books', cursor='hand2', state=DISABLED)
+addButton_del=Button(leftFrame, text='Delete Books', command=del_book, cursor='hand2', state=DISABLED)
 addButton_del.grid(row=7, column=0, pady=20)
 
 #Right Frame
@@ -205,7 +266,7 @@ def connect_database():
 
     #Login_command
     def login():
-        global mycursor
+        global mycursor,con
         try:
             con=pymysql.connect(user=usernameEntry.get(), password=passwordEntry.get())
             mycursor=con.cursor()
