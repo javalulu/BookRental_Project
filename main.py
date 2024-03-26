@@ -1,10 +1,74 @@
 from tkinter import *
 from PIL import ImageTk
 import time
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import pymysql
 
+def view_all():
+  query='select * from books'
+  mycursor.execute(query)
+  bookTable.delete(*bookTable.get_children())
+  fetched_data=mycursor.fetchall()
+  for data in fetched_data:
+      bookTable.insert('', END, values=data)
+
+def search_book():
+
+    def search_data():
+        query='select * from books where ISBN = %s'
+        mycursor.execute(query, (isbnEntry.get()))
+        bookTable.delete(*bookTable.get_children())
+        fetched_data=mycursor.fetchall()
+        for data in fetched_data:
+            bookTable.insert('', END, values=data)
+
+
+    search_window = Toplevel()
+    search_window.title('Search Book')
+    search_window.grab_set()
+
+    isbnLabel = Label(search_window, text='ISBN', font=('times new roman', 20, 'bold'))
+    isbnLabel.grid(padx=30, pady=15)
+    isbnEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    isbnEntry.grid(row=0, column=1, padx=10, pady=15)
+
+    titleLabel = Label(search_window, text='Title', font=('times new roman', 20, 'bold'))
+    titleLabel.grid(padx=30, pady=15)
+    titleEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    titleEntry.grid(row=1, column=1, padx=10, pady=15)
+
+    authorLabel = Label(search_window, text='Author', font=('times new roman', 20, 'bold'))
+    authorLabel.grid(padx=30, pady=15)
+    authorEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    authorEntry.grid(row=2, column=1, padx=10, pady=15)
+
+    PubLabel = Label(search_window, text='Publisher', font=('times new roman', 20, 'bold'))
+    PubLabel.grid(padx=30, pady=15)
+    PubEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    PubEntry.grid(row=3, column=1, padx=10, pady=15)
+
+    PubyLabel = Label(search_window, text='Publish Year', font=('times new roman', 20, 'bold'))
+    PubyLabel.grid(padx=30, pady=15)
+    PubyEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    PubyEntry.grid(row=4, column=1, padx=10, pady=15)
+
+    CopiesLabel = Label(search_window, text='Number of Copies', font=('times new roman', 20, 'bold'))
+    CopiesLabel.grid(padx=30, pady=15)
+    CopiesEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    CopiesEntry.grid(row=5, column=1, padx=10, pady=15)
+
+    RentLabel = Label(search_window, text='Rental Price', font=('times new roman', 20, 'bold'))
+    RentLabel.grid(padx=30, pady=15)
+    RentEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    RentEntry.grid(row=6, column=1, padx=10, pady=15)
+
+    PayLabel = Label(search_window, text='Actual Price', font=('times new roman', 20, 'bold'))
+    PayLabel.grid(padx=30, pady=15)
+    PayEntry = Entry(search_window, font=('roman', 15, 'bold'), width=24)
+    PayEntry.grid(row=7, column=1, padx=10, pady=15)
+
+    search_book_button = Button(search_window, text='Search', command=search_data)
+    search_book_button.grid(row=8, columnspan=2, pady=15)
 
 def add_book():
 
@@ -37,11 +101,11 @@ def add_book():
             fetchedData=mycursor.fetchall()
             bookTable.delete(*bookTable.get_children())
             for data in fetchedData:
-                datalist=list(data)
-                bookTable.insert('', END, values=datalist)
+                bookTable.insert('', END, values=data)
 
     add_window=Toplevel()
     add_window.grab_set()
+
     isbnLabel=Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
     isbnLabel.grid(padx=30, pady=15)
     isbnEntry=Entry(add_window,font=('roman', 15, 'bold'), width=24)
@@ -67,7 +131,7 @@ def add_book():
     PubyEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
     PubyEntry.grid(row=4, column=1, padx=10, pady=15)
 
-    CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
+    CopiesLabel = Label(add_window, text='Number of Copies', font=('times new roman', 20, 'bold'))
     CopiesLabel.grid(padx=30, pady=15)
     CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
     CopiesEntry.grid(row=5, column=1, padx=10, pady=15)
@@ -86,67 +150,61 @@ def add_book():
     add_book_button.grid(row=8,columnspan=2,pady=15)
 
 def del_book():
-    def del_data():
-        if isbnEntry.get() == '' or CopiesEntry.get() == '':
-            messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+  def del_data():
+    if isbnEntry.get() == '' or CopiesEntry.get() == '':
+      messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+    else:
+      try:
+        # Check if the book with the given ISBN exists
+        query_select = 'SELECT * FROM books WHERE ISBNCode = %s'
+        mycursor.execute(query_select, (isbnEntry.get(),))
+        book = mycursor.fetchone()
+        if book is None:
+          messagebox.showerror('Error', 'Book not found with provided ISBN', parent=add_window)
         else:
-            try:
-                # Check if the book with the given ISBN exists
-                query_select = 'SELECT * FROM books WHERE isbn = %s'
-                mycursor.execute(query_select, (isbnEntry.get(),))
-                book = mycursor.fetchone()
-                if book is None:
-                    messagebox.showerror('Error', 'Book not found with provided ISBN', parent=add_window)
-                else:
-                    # Delete the book record
-                    query_delete = 'DELETE FROM books WHERE isbn = %s'
-                    mycursor.execute(query_delete, (isbnEntry.get(),))
+          # Update the number of copies available
+          new_copies = int(book[5]) - int(CopiesEntry.get())  # Subtracting the copies to delete
+          if new_copies < 0:
+            messagebox.showerror('Error', 'Number of copies to delete exceeds available copies', parent=add_window)
+            return
 
-                    # Update the number of copies available
-                    new_copies = int(book[5]) - int(CopiesEntry.get())  # Subtracting the copies to delete
-                    if new_copies < 0:
-                        messagebox.showerror('Error', 'Number of copies to delete exceeds available copies', parent=add_window)
-                        return
+          query_update = 'UPDATE books SET CopiesAvailable = %s WHERE ISBNCode = %s'
+          mycursor.execute(query_update, (new_copies, isbnEntry.get()))
+          con.commit()
+          result = messagebox.askyesno('Data deleted successfully. Do you want to clear the form', parent=add_window)
+          if result:
+            isbnEntry.delete(0, END)
+            CopiesEntry.delete(0, END)
+          else:
+            pass
 
-                    query_update = 'UPDATE books SET copies_available = %s WHERE isbn = %s'
-                    mycursor.execute(query_update, (new_copies, isbnEntry.get()))
+        # Refresh the book table display
+        query = 'select * from books'
+        mycursor.execute(query)
+        fetchedData = mycursor.fetchall()
+        bookTable.delete(*bookTable.get_children())
+        for data in fetchedData:
+          datalist = list(data)
+          bookTable.insert('', END, values=datalist)
 
-                    con.commit()
+      except Exception as e:
+        messagebox.showerror('Error', str(e), parent=add_window)
 
-                    result = messagebox.askyesno('Data deleted successfully. Do you want to clear the form', parent=add_window)
-                    if result:
-                        isbnEntry.delete(0, END)
-                        CopiesEntry.delete(0, END)
-                    else:
-                        pass
+  add_window = Toplevel()
+  add_window.grab_set()
 
-                    # Refresh the book table display
-                    query = 'SELECT * FROM books'
-                    mycursor.execute(query)
-                    fetchedData = mycursor.fetchall()
-                    bookTable.delete(*bookTable.get_children())
-                    for data in fetchedData:
-                        datalist = list(data)
-                        bookTable.insert('', END, values=datalist)
+  isbnLabel = Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
+  isbnLabel.grid(padx=30, pady=15)
+  isbnEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+  isbnEntry.grid(row=0, column=1, padx=10, pady=15)
 
-            except Exception as e:
-                messagebox.showerror('Error', str(e), parent=add_window)
+  CopiesLabel = Label(add_window, text='Copies', font=('times new roman', 20, 'bold'))
+  CopiesLabel.grid(padx=30, pady=15)
+  CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+  CopiesEntry.grid(row=1, column=1, padx=10, pady=15)
 
-    add_window = Toplevel()
-    add_window.grab_set()
-
-    isbnLabel = Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
-    isbnLabel.grid(padx=30, pady=15)
-    isbnEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-    isbnEntry.grid(row=0, column=1, padx=10, pady=15)
-
-    CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
-    CopiesLabel.grid(padx=30, pady=15)
-    CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-    CopiesEntry.grid(row=1, column=1, padx=10, pady=15)
-
-    del_book_button = Button(add_window, text='Delete Book', command=del_data)
-    del_book_button.grid(row=2, columnspan=2, pady=15)
+  del_book_button = Button(add_window, text='Delete Book', command=del_data)
+  del_book_button.grid(row=2, columnspan=2, pady=15)
 
 window = Tk()
 
@@ -229,7 +287,7 @@ scrollBarY=Scrollbar(rigthFrame,orient=VERTICAL)
 
 bookTable=ttk.Treeview(rigthFrame,columns=('CustomerID', 'Name', 'Email', 'Phone Number', 'Address', 'RentalID',
                                            'Rental Starts Date', 'Due Date', 'Return Date', 'Rental Fee', 'ISBN Code', 'Title',
-                                           'Author', 'Publisher', 'Publish Year', 'Copies Available', 'Rental Price'),
+                                           'Author', 'Publisher', 'Publish Year', 'Copies Available', 'Rental Price', 'Actual Price'),
                        xscrollcommand=scrollBarX.set, yscrollcommand=scrollBarY.set)
 
 scrollBarX.config(command=bookTable.xview)
@@ -257,7 +315,7 @@ bookTable.heading('Publisher',text='Publisher')
 bookTable.heading('Publish Year',text='Pubilsh Year')
 bookTable.heading('Copies Available',text='Copies Available')
 bookTable.heading('Rental Price',text='Rental Price')
-
+bookTable.heading('Actual Price',text='Actual Price')
 
 bookTable.config(show='headings')
 
@@ -272,16 +330,20 @@ def connect_database():
             mycursor=con.cursor()
             messagebox.showinfo('Success', 'LOGGED IN')
             connectWindow.destroy()
+            addButton_PlaceOrder.config(state=NORMAL)
+            addButton_ReturnBooks.config(state=NORMAL)
+            addButton_Viewall.config(state=NORMAL)
+            addButton_Search.config(state=NORMAL)
+            addButton_Overdue.config(state=NORMAL)
+            addButton_add.config(state=NORMAL)
+            addButton_del.config(state=NORMAL)
         except:
             messagebox.showerror('Error', 'Please enter the correct username or password', parent=connectWindow)
 
-        addButton_PlaceOrder.config(state=NORMAL)
-        addButton_ReturnBooks.config(state=NORMAL)
-        addButton_Viewall.config(state=NORMAL)
-        addButton_Search.config(state=NORMAL)
-        addButton_Overdue.config(state=NORMAL)
-        addButton_add.config(state=NORMAL)
-        addButton_del.config(state=NORMAL)
+        query = 'use book_rental_shop_database'
+        mycursor.execute(query)
+
+
 
     connectWindow=Toplevel()
     connectWindow.grab_set()
