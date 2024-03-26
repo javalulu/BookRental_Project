@@ -3,47 +3,89 @@ from PIL import ImageTk
 import time
 from tkinter import ttk
 from tkinter import messagebox
+import pymysql
 
 
 def add_book():
-  add_window=Toplevel()
-  isbnLabel=Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
-  isbnLabel.grid(padx=30, pady=15)
-  isbnEntry=Entry(add_window,font=('roman', 15, 'bold'), width=24)
-  isbnEntry.grid(row=0, column=1,padx=10, pady=15)
 
-  titleLabel = Label(add_window, text='Title', font=('times new roman', 20, 'bold'))
-  titleLabel.grid(padx=30, pady=15)
-  titleEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  titleEntry.grid(row=1, column=1, padx=10, pady=15)
+    def add_data():
+        if isbnEntry.get()=='' or titleEntry.get()=='' or authorEntry.get()=='' or PubEntry.get()=='' or PubyEntry.get()=='' or CopiesEntry.get()=='' or RentEntry.get()=='' or PayEntry.get()=='':
+            messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+        else:
+            try:
+                query='insert into books values(%s,%s,%s,%s,%s,%s,%s,%s)'
+                mycursor.execute(query,(isbnEntry.get(), titleEntry.get(), authorEntry.get(), PubEntry.get(), PubyEntry.get(), CopiesEntry.get(), RentEntry.get(), PayEntry.get()))
+                con.commit()
+                result=messagebox.askyesno('Data added successfully. Do you want to clear the form', parent=add_window)
+                if result:
+                    isbnEntry.delete(0,END)
+                    titleEntry.delete(0, END)
+                    authorEntry.delete(0, END)
+                    PubEntry.delete(0, END)
+                    PubyEntry.delete(0, END)
+                    CopiesEntry.delete(0, END)
+                    RentEntry.delete(0, END)
+                    PayEntry.delete(0, END)
+                else:
+                    pass
+            except:
+                messagebox.showerror('Error', 'ISBN Code cannot be repeated', parent=add_window)
+                return
 
-  authorLabel = Label(add_window, text='Author', font=('times new roman', 20, 'bold'))
-  authorLabel.grid(padx=30, pady=15)
-  authorEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  authorEntry.grid(row=2, column=1, padx=10, pady=15)
+            query='select * from books'
+            mycursor.execute(query)
+            fetchedData=mycursor.fetchall()
+            bookTable.delete(*bookTable.get_children())
+            for data in fetchedData:
+                datalist=list(data)
+                bookTable.insert('', END, values=datalist)
 
-  PubLabel = Label(add_window, text='Publisher', font=('times new roman', 20, 'bold'))
-  PubLabel.grid(padx=30, pady=15)
-  PubEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  PubEntry.grid(row=3, column=1, padx=10, pady=15)
 
-  PubyLabel = Label(add_window, text='Publish Year', font=('times new roman', 20, 'bold'))
-  PubyLabel.grid(padx=30, pady=15)
-  PubyEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  PubyEntry.grid(row=4, column=1, padx=10, pady=15)
 
-  CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
-  CopiesLabel.grid(padx=30, pady=15)
-  CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  CopiesEntry.grid(row=5, column=1, padx=10, pady=15)
+    add_window=Toplevel()
+    add_window.grab_set()
+    isbnLabel=Label(add_window, text='ISBN', font=('times new roman', 20, 'bold'))
+    isbnLabel.grid(padx=30, pady=15)
+    isbnEntry=Entry(add_window,font=('roman', 15, 'bold'), width=24)
+    isbnEntry.grid(row=0, column=1,padx=10, pady=15)
 
-  RentLabel = Label(add_window, text='Rental Price', font=('times new roman', 20, 'bold'))
-  RentLabel.grid(padx=30, pady=15)
-  RentEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
-  RentEntry.grid(row=6, column=1, padx=10, pady=15)
+    titleLabel = Label(add_window, text='Title', font=('times new roman', 20, 'bold'))
+    titleLabel.grid(padx=30, pady=15)
+    titleEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    titleEntry.grid(row=1, column=1, padx=10, pady=15)
 
-  add_book_button=Button(add_window, text='Add Book')
-  add_book_button.grid(row=7,columnspan=2,pady=15)
+    authorLabel = Label(add_window, text='Author', font=('times new roman', 20, 'bold'))
+    authorLabel.grid(padx=30, pady=15)
+    authorEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    authorEntry.grid(row=2, column=1, padx=10, pady=15)
+
+    PubLabel = Label(add_window, text='Publisher', font=('times new roman', 20, 'bold'))
+    PubLabel.grid(padx=30, pady=15)
+    PubEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    PubEntry.grid(row=3, column=1, padx=10, pady=15)
+
+    PubyLabel = Label(add_window, text='Publish Year', font=('times new roman', 20, 'bold'))
+    PubyLabel.grid(padx=30, pady=15)
+    PubyEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    PubyEntry.grid(row=4, column=1, padx=10, pady=15)
+
+    CopiesLabel = Label(add_window, text=' Copies Available', font=('times new roman', 20, 'bold'))
+    CopiesLabel.grid(padx=30, pady=15)
+    CopiesEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    CopiesEntry.grid(row=5, column=1, padx=10, pady=15)
+
+    RentLabel = Label(add_window, text='Rental Price', font=('times new roman', 20, 'bold'))
+    RentLabel.grid(padx=30, pady=15)
+    RentEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    RentEntry.grid(row=6, column=1, padx=10, pady=15)
+
+    PayLabel = Label(add_window, text='Actual Price', font=('times new roman', 20, 'bold'))
+    PayLabel.grid(padx=30, pady=15)
+    PayEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    PayEntry.grid(row=7, column=1, padx=10, pady=15)
+
+    add_book_button=Button(add_window, text='Add Book', command=add_data)
+    add_book_button.grid(row=8,columnspan=2,pady=15)
 
 window = Tk()
 
@@ -96,25 +138,25 @@ logoLabel=Label(leftFrame, image=logo_image)
 logoLabel.grid(row=0, column=0)
 
 #(buttons)
-addButton_PlaceOrder=Button(leftFrame, text='Place Order', cursor='hand2')
+addButton_PlaceOrder=Button(leftFrame, text='Place Order', cursor='hand2', state=DISABLED)
 addButton_PlaceOrder.grid(row=1, column=0, padx=100, pady=20)
 
-addButton_ReturnBooks=Button(leftFrame, text='Return Books', cursor='hand2')
+addButton_ReturnBooks=Button(leftFrame, text='Return Books', cursor='hand2', state=DISABLED)
 addButton_ReturnBooks.grid(row=2, column=0, pady=20)
 
-addButton_Viewall=Button(leftFrame, text='View All Available Books', cursor='hand2')
+addButton_Viewall=Button(leftFrame, text='View All Available Books', cursor='hand2', state=DISABLED)
 addButton_Viewall.grid(row=3, column=0, pady=20)
 
-addButton_Search=Button(leftFrame, text='Search', cursor='hand2')
+addButton_Search=Button(leftFrame, text='Search', cursor='hand2', state=DISABLED)
 addButton_Search.grid(row=4, column=0, pady=20)
 
-addButton_Overdue=Button(leftFrame, text='Overdue Orders', cursor='hand2')
+addButton_Overdue=Button(leftFrame, text='Overdue Orders', cursor='hand2', state=DISABLED)
 addButton_Overdue.grid(row=5, column=0, pady=20)
 
-addButton_add=Button(leftFrame, text='Add New Books', cursor='hand2', command=add_book)
+addButton_add=Button(leftFrame, text='Add New Books', cursor='hand2', command=add_book, state=DISABLED)
 addButton_add.grid(row=6, column=0, pady=20)
 
-addButton_del=Button(leftFrame, text='Delete Books', cursor='hand2')
+addButton_del=Button(leftFrame, text='Delete Books', cursor='hand2', state=DISABLED)
 addButton_del.grid(row=7, column=0, pady=20)
 
 #Right Frame
@@ -161,16 +203,27 @@ bookTable.config(show='headings')
 #Login Buttom
 def connect_database():
 
-    # Login_command
+    #Login_command
     def login():
-        if usernameEntry.get() == '' or passwordEntry.get() == '':
-            messagebox.showerror('Error', 'Fields cannot be empty')
-        elif usernameEntry.get() == 'Chen_Jack' and passwordEntry.get() == '123456':
+        global mycursor
+        try:
+            con=pymysql.connect(user=usernameEntry.get(), password=passwordEntry.get())
+            mycursor=con.cursor()
             messagebox.showinfo('Success', 'LOGGED IN')
-        else:
-            messagebox.showerror('Error', 'Please enter the correct username or password')
+            connectWindow.destroy()
+        except:
+            messagebox.showerror('Error', 'Please enter the correct username or password', parent=connectWindow)
+
+        addButton_PlaceOrder.config(state=NORMAL)
+        addButton_ReturnBooks.config(state=NORMAL)
+        addButton_Viewall.config(state=NORMAL)
+        addButton_Search.config(state=NORMAL)
+        addButton_Overdue.config(state=NORMAL)
+        addButton_add.config(state=NORMAL)
+        addButton_del.config(state=NORMAL)
 
     connectWindow=Toplevel()
+    connectWindow.grab_set()
     connectWindow.geometry('470x200+530+230')
     connectWindow.title('Login To Database')
     connectWindow.resizable(0,0)
