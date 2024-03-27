@@ -6,6 +6,7 @@ from tkinter import ttk, messagebox
 import pymysql
 
 def view_all():
+    clear_right_frame()
     bookTable = ttk.Treeview(rigthFrame, columns=('ISBN Code', 'Title', 'Author', 'Publisher', 'Publish Year',
                                                   'Copies Available', 'Rental Price', 'Actual Price'),
                              xscrollcommand=scrollBarX.set, yscrollcommand=scrollBarY.set)
@@ -35,7 +36,37 @@ def view_all():
     for data in fetched_data:
         bookTable.insert('', END, values=data)
 
+def view_all_init():
+    bookTable = ttk.Treeview(rigthFrame, columns=('ISBN Code', 'Title', 'Author', 'Publisher', 'Publish Year',
+                                                  'Copies Available', 'Rental Price', 'Actual Price'),
+                             xscrollcommand=scrollBarX.set, yscrollcommand=scrollBarY.set)
+
+    scrollBarX.config(command=bookTable.xview)
+    scrollBarY.config(command=bookTable.yview)
+
+    scrollBarX.pack(side=BOTTOM, fill=X)
+    scrollBarY.pack(side=RIGHT, fill=Y)
+
+    bookTable.pack(fill=BOTH, expand=1)
+    bookTable.heading('ISBN Code', text='ISBN Code')
+    bookTable.heading('Title', text='Title')
+    bookTable.heading('Author', text='Author')
+    bookTable.heading('Publisher', text='Publisher')
+    bookTable.heading('Publish Year', text='Pubilsh Year')
+    bookTable.heading('Copies Available', text='Copies Available')
+    bookTable.heading('Rental Price', text='Rental Price')
+    bookTable.heading('Actual Price', text='Actual Price')
+
+    bookTable.config(show='headings')
+
+    query = 'select * from books'
+    mycursor.execute(query)
+    bookTable.delete(*bookTable.get_children())
+    fetched_data = mycursor.fetchall()
+    for data in fetched_data:
+        bookTable.insert('', END, values=data)
 def place_order():
+    clear_right_frame()
     # order_table
     orderTable = ttk.Treeview(rigthFrame, columns=('Rental ID', 'Customer ID', 'ISBN Code', 'Rental Start Date', 'Due Date',
                                                   'Return Date', 'Rental Price', 'Actual Price'),
@@ -200,7 +231,7 @@ def place_order():
     add_order_button.grid(row=8, columnspan=2, pady=15)
 
 def return_book():
-
+    clear_right_frame()
     # Rentals_table
     rentalsTable = ttk.Treeview(rigthFrame, columns=('RentalID', 'CustomerID', 'ISBN Code', 'Rental Starts Date',
                                                      'Due Date', 'Return Date', 'Rental Price', 'Actual Price'),
@@ -309,7 +340,7 @@ def return_book():
     return_button.grid(row=2, columnspan=2, pady=15)
 
 def show_overdue_orders():
-
+    clear_right_frame()
     #Rentals_table
     rentalsTable = ttk.Treeview(rigthFrame, columns=('RentalID', 'CustomerID', 'ISBN Code', 'Rental Starts Date',
                                                   'Due Date', 'Return Date', 'Rental Price','Actual Price'),
@@ -343,7 +374,7 @@ def show_overdue_orders():
         rentalsTable.insert('', END, values=order)
 
 def search_book():
-
+    clear_right_frame()
     #Book_table
     bookTable = ttk.Treeview(rigthFrame, columns=('ISBN Code', 'Title', 'Author', 'Publisher', 'Publish Year',
                                                   'Copies Available', 'Rental Price', 'Actual Price'),
@@ -425,7 +456,7 @@ def search_book():
     search_book_button.grid(row=8, columnspan=2, pady=15)
 
 def add_book():
-
+    clear_right_frame()
     #Book_table
     bookTable = ttk.Treeview(rigthFrame, columns=('ISBN Code', 'Title', 'Author', 'Publisher', 'Publish Year',
                                                   'Copies Available', 'Rental Price', 'Actual Price'),
@@ -529,8 +560,14 @@ def add_book():
     add_book_button.grid(row=8,columnspan=2,pady=15)
 
 
-def del_book():
+def clear_right_frame():
+    # Destroy all widgets in the right frame
+    for widget in rigthFrame.winfo_children():
+        if isinstance(widget, ttk.Treeview):
+            widget.destroy()
 
+def del_book():
+    clear_right_frame()
     #Book_table
     bookTable = ttk.Treeview(rigthFrame, columns=('ISBN Code', 'Title', 'Author', 'Publisher', 'Publish Year',
                                                   'Copies Available', 'Rental Price', 'Actual Price'),
@@ -541,6 +578,7 @@ def del_book():
 
     scrollBarX.pack(side=BOTTOM, fill=X)
     scrollBarY.pack(side=RIGHT, fill=Y)
+
 
     bookTable.pack(fill=BOTH, expand=1)
     bookTable.heading('ISBN Code', text='ISBN Code')
@@ -714,6 +752,7 @@ def connect_database():
 
         query = 'use book_rental'
         mycursor.execute(query)
+        view_all_init()
 
 
 
