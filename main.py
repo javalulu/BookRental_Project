@@ -1,7 +1,7 @@
 from tkinter import *
 from PIL import ImageTk
 import time
-from datetime import date
+from datetime import date, timedelta
 from tkinter import ttk, messagebox
 import pymysql
 
@@ -35,6 +35,160 @@ def view_all():
     for data in fetched_data:
         bookTable.insert('', END, values=data)
 
+def place_order():
+    # order_table
+    orderTable = ttk.Treeview(rigthFrame, columns=('Rental ID', 'Customer ID', 'ISBN Code', 'Rental Start Date', 'Due Date',
+                                                  'Return Date', 'Rental Price', 'Actual Price'),
+                             xscrollcommand=scrollBarX.set, yscrollcommand=scrollBarY.set)
+
+    scrollBarX.config(command=orderTable.xview)
+    scrollBarY.config(command=orderTable.yview)
+
+    scrollBarX.pack(side=BOTTOM, fill=X)
+    scrollBarY.pack(side=RIGHT, fill=Y)
+
+    orderTable.pack(fill=BOTH, expand=1)
+    orderTable.heading('Rental ID', text='Rental ID')
+    orderTable.heading('Customer ID', text='Customer ID')
+    orderTable.heading('ISBN Code', text='ISBN Code')
+    orderTable.heading('Rental Start Date', text='Rental Start Date')
+    orderTable.heading('Due Date', text='Due Date')
+    orderTable.heading('Return Date', text='Return Date')
+    orderTable.heading('Rental Price', text='Rental Price')
+    orderTable.heading('Actual Price', text='Actual Price')
+
+    orderTable.config(show='headings')
+
+    def add_customer():
+        def add_data():
+            if CustomerIDEntry.get() == '' or NameEntry.get() == '' or EmailEntry.get() == '' or PhoneNumberEntry.get() == '' or AddressEntry.get() == '':
+                messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+            else:
+                try:
+                    query = 'INSERT INTO customers (CustomerID, Name, Email, PhoneNumber, Address) VALUES (%s,%s,%s,%s,%s)'
+                    mycursor.execute(query, (
+                    CustomerIDEntry.get(), NameEntry.get(), EmailEntry.get(), PhoneNumberEntry.get(),
+                    AddressEntry.get()))
+                    con.commit()
+                    result = messagebox.askyesno('Success',
+                                                 'Customer added successfully. Do you want to clear the form',
+                                                 parent=add_window)
+                    if result:
+                        CustomerIDEntry.delete(0, END)
+                        NameEntry.delete(0, END)
+                        EmailEntry.delete(0, END)
+                        PhoneNumberEntry.delete(0, END)
+                        AddressEntry.delete(0, END)
+                except Exception as e:
+                    messagebox.showerror('Error', str(e), parent=add_window)
+        # Add_box
+        add_window = Toplevel()
+        add_window.grab_set()
+
+        CustomerIDLabel = Label(add_window, text='Customer ID', font=('times new roman', 20, 'bold'))
+        CustomerIDLabel.grid(padx=30, pady=15)
+        CustomerIDEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+        CustomerIDEntry.grid(row=0, column=1, padx=10, pady=15)
+
+        NameLabel = Label(add_window, text='Name', font=('times new roman', 20, 'bold'))
+        NameLabel.grid(padx=30, pady=15)
+        NameEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+        NameEntry.grid(row=1, column=1, padx=10, pady=15)
+
+        EmailLabel = Label(add_window, text='Email', font=('times new roman', 20, 'bold'))
+        EmailLabel.grid(padx=30, pady=15)
+        EmailEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+        EmailEntry.grid(row=2, column=1, padx=10, pady=15)
+
+        PhoneNumberLabel = Label(add_window, text='Phone Number', font=('times new roman', 20, 'bold'))
+        PhoneNumberLabel.grid(padx=30, pady=15)
+        PhoneNumberEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+        PhoneNumberEntry.grid(row=3, column=1, padx=10, pady=15)
+
+        AddressLabel = Label(add_window, text='Address', font=('times new roman', 20, 'bold'))
+        AddressLabel.grid(padx=30, pady=15)
+        AddressEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+        AddressEntry.grid(row=4, column=1, padx=10, pady=15)
+
+        add_customer_button = Button(add_window, text='Add Customer', command=add_data)
+        add_customer_button.grid(row=5, columnspan=2, pady=15)
+
+    def order_data():
+        current_date = date.today()
+        due_date = current_date + timedelta(days=7)  # Due date is set as 1 week later
+
+        if RentalIDEntry.get() == '' or CustomerIDEntry.get() == '' or ISBNCodeEntry.get() == '':
+            messagebox.showerror('Error', 'All Fields are required', parent=add_window)
+        else:
+            try:
+                # Check if ISBNCode exists
+                query_isbn = 'SELECT * FROM books WHERE ISBNCode = %s'
+                mycursor.execute(query_isbn, (ISBNCodeEntry.get(),))
+                book = mycursor.fetchone()
+                if book is None:
+                    messagebox.showerror('Error', 'ISBN Code not found', parent=add_window)
+                else:
+                    # Check if CustomerID exists
+                    query_cusID = 'SELECT * FROM customers WHERE CustomerID = %s'
+                    mycursor.execute(query_cusID, (CustomerIDEntry.get(),))
+                    customer = mycursor.fetchone()
+                    if customer is None:
+                        # If CustomerID not found, prompt user to add new customer
+                        result = messagebox.askyesno('Customer Not Found',
+                                                     'Customer ID not found. Do you want to add it as a new customer?',
+                                                     parent=add_window)
+                        if result:
+                            add_customer()  # Trigger add_customer function
+                        else:
+                            return  # Exit function if user chooses not to add new customer
+                    else:
+                        if book[5] == 0:  # Check if CopiesAvailable is 0
+                            messagebox.showerror('Error', 'No copies available for this book', parent=add_window)
+                        else:
+                            RentalPrice = book[6]  # Fetching RentalPrice from the book fetched
+                            ActualPayment = book[7]  # Fetching ActualPayment from the book fetched
+                            # Update CopiesAvailable value in the books database
+                            updated_copies = book[5] - 1
+                            query_update_copies = 'UPDATE books SET CopiesAvailable = %s WHERE ISBNCode = %s'
+                            mycursor.execute(query_update_copies, (updated_copies, ISBNCodeEntry.get()))
+                            con.commit()
+                            # Insert order data into Rentals table
+                            query = 'INSERT INTO Rentals (RentalID, CustomerID, ISBNCode, RentalStartDate, DueDate, ReturnDate, RentalPrice, ActualPayment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'
+                            mycursor.execute(query, (
+                            RentalIDEntry.get(), CustomerIDEntry.get(), ISBNCodeEntry.get(), current_date, due_date,
+                            None, RentalPrice, ActualPayment))
+                            con.commit()
+                            result = messagebox.askyesno('Success',
+                                                         'Data added successfully. Do you want to clear the form',
+                                                         parent=add_window)
+                            if result:
+                                RentalIDEntry.delete(0, END)
+                                CustomerIDEntry.delete(0, END)
+                                ISBNCodeEntry.delete(0, END)
+            except Exception as e:
+                messagebox.showerror('Error', str(e), parent=add_window)
+
+    # Add_box
+    add_window = Toplevel()
+    add_window.grab_set()
+
+    RentalIDLabel = Label(add_window, text='Rental ID', font=('times new roman', 20, 'bold'))
+    RentalIDLabel.grid(padx=30, pady=15)
+    RentalIDEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    RentalIDEntry.grid(row=0, column=1, padx=10, pady=15)
+
+    CustomerIDLabel = Label(add_window, text='Customer ID', font=('times new roman', 20, 'bold'))
+    CustomerIDLabel.grid(padx=30, pady=15)
+    CustomerIDEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    CustomerIDEntry.grid(row=1, column=1, padx=10, pady=15)
+
+    ISBNCodeLabel = Label(add_window, text='ISBN Code', font=('times new roman', 20, 'bold'))
+    ISBNCodeLabel.grid(padx=30, pady=15)
+    ISBNCodeEntry = Entry(add_window, font=('roman', 15, 'bold'), width=24)
+    ISBNCodeEntry.grid(row=2, column=1, padx=10, pady=15)
+
+    add_order_button = Button(add_window, text='Add Order', command=order_data)
+    add_order_button.grid(row=8, columnspan=2, pady=15)
 
 def return_book():
 
@@ -500,7 +654,7 @@ logoLabel=Label(leftFrame, image=logo_image)
 logoLabel.grid(row=0, column=0)
 
 #(buttons)
-addButton_PlaceOrder=Button(leftFrame, text='Place Order', cursor='hand2', state=DISABLED)
+addButton_PlaceOrder=Button(leftFrame, text='Place Order', cursor='hand2', state=DISABLED, command=place_order)
 addButton_PlaceOrder.grid(row=1, column=0, padx=100, pady=20)
 
 addButton_ReturnBooks=Button(leftFrame, text='Return Books', cursor='hand2', state=DISABLED, command=return_book)
