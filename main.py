@@ -59,6 +59,14 @@ def place_order():
 
     orderTable.config(show='headings')
 
+    def refresh_orders_table():
+        query = 'SELECT * FROM rentals'
+        mycursor.execute(query)
+        fetchedData = mycursor.fetchall()
+        orderTable.delete(*orderTable.get_children())
+        for data in fetchedData:
+            orderTable.insert('', END, values=data)
+
     def add_customer():
         def add_data():
             if CustomerIDEntry.get() == '' or NameEntry.get() == '' or EmailEntry.get() == '' or PhoneNumberEntry.get() == '' or AddressEntry.get() == '':
@@ -146,7 +154,6 @@ def place_order():
                             messagebox.showerror('Error', 'No copies available for this book', parent=add_window)
                         else:
                             RentalPrice = book[6]  # Fetching RentalPrice from the book fetched
-                            ActualPayment = book[7]  # Fetching ActualPayment from the book fetched
                             # Update CopiesAvailable value in the books database
                             updated_copies = book[5] - 1
                             query_update_copies = 'UPDATE books SET CopiesAvailable = %s WHERE ISBNCode = %s'
@@ -156,7 +163,7 @@ def place_order():
                             query = 'INSERT INTO Rentals (RentalID, CustomerID, ISBNCode, RentalStartDate, DueDate, ReturnDate, RentalPrice, ActualPayment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'
                             mycursor.execute(query, (
                             RentalIDEntry.get(), CustomerIDEntry.get(), ISBNCodeEntry.get(), current_date, due_date,
-                            None, RentalPrice, ActualPayment))
+                            None, RentalPrice, None))
                             con.commit()
                             result = messagebox.askyesno('Success',
                                                          'Data added successfully. Do you want to clear the form',
@@ -167,6 +174,8 @@ def place_order():
                                 ISBNCodeEntry.delete(0, END)
             except Exception as e:
                 messagebox.showerror('Error', str(e), parent=add_window)
+
+            refresh_orders_table()  # Call function to refresh orders table
 
     # Add_box
     add_window = Toplevel()
