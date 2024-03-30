@@ -1,0 +1,108 @@
+# Put the following code into Mysql in your computer before running main.py, this is to create a databse called 'book_rental' and also input dummy data into the database.
+
+CREATE DATABASE IF NOT EXISTS book_rental;
+
+DROP TABLE IF EXISTS Customers CASCADE;
+CREATE TABLE Customers (
+    CustomerID INT NOT NULL PRIMARY KEY,
+    Name VARCHAR(50),
+    Email VARCHAR(30),
+    PhoneNumber VARCHAR(13),
+    Address VARCHAR(100)
+);
+
+
+INSERT INTO Customers (CustomerID, Name, Email, PhoneNumber, Address)
+VALUES
+    (1, 'John Doe', 'john@example.com', '123-456-7890', '123 Main St, Cityville'),
+    (2, 'Jane Smith', 'jane@example.com', '987-654-3210', '456 Elm St, Townsville'),
+    (3, 'Alice Johnson', 'alice@example.com', '555-555-5555', '789 Oak St, Villagetown'),
+    (4, 'Michael Johnson', 'michael@example.com', '111-222-3333', '321 Pine St, Hamletville'),
+    (5, 'Emily Brown', 'emily@example.com', '444-555-6666', '567 Maple St, Villageton'),
+    (6, 'David Wilson', 'david@example.com', '777-888-9999', '987 Cedar St, Townsburg'),
+    (7, 'Sarah Lee', 'sarah@example.com', '555-123-4567', '789 Oak St, Citytown'),
+    (8, 'Matthew Taylor', 'matthew@example.com', '321-987-6543', '456 Birch St, Villagetown'),
+    (9, 'Olivia Martinez', 'olivia@example.com', '789-456-1230', '123 Pine St, Townsville'),
+    (10, 'Daniel Brown', 'daniel@example.com', '987-654-3210', '789 Elm St, Cityville'),
+    (11, 'Sophia Nguyen', 'sophia@example.com', '555-777-9999', '321 Cedar St, Hamletville'),
+    (12, 'Ethan Kim', 'ethan@example.com', '444-222-1111', '567 Oak St, Villageton'),
+    (13, 'Isabella Wong', 'isabella@example.com', '123-789-4560', '987 Maple St, Townsville'),
+    (14, 'Mason Chen', 'mason@example.com', '789-654-3210', '123 Birch St, Citytown'),
+    (15, 'Ava Gupta', 'ava@example.com', '888-999-0000', '456 Pine St, Cityville'),
+    (16, 'Logan Kumar', 'logan@example.com', '777-666-5555', '789 Cedar St, Villagetown'),
+    (17, 'Harper Patel', 'harper@example.com', '111-222-3333', '987 Elm St, Townsburg'),
+    (18, 'Amelia Li', 'amelia@example.com', '222-333-4444', '321 Oak St, Hamletville'),
+    (19, 'Benjamin Smith', 'benjamin@example.com', '333-444-5555', '567 Maple St, Citytown'),
+    (20, 'Evelyn Johnson', 'evelyn@example.com', '444-555-6666', '789 Birch St, Villageton');
+
+DROP TABLE IF EXISTS Books CASCADE;
+CREATE TABLE Books (
+    ISBNCode VARCHAR(20) NOT NULL PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Author VARCHAR(255),
+    Publisher VARCHAR(255),
+    PublishYear INT,
+    CopiesAvailable INT,
+    RentalPrice DECIMAL(10, 2),
+    ActualPrice DECIMAL(10, 2)
+);
+
+INSERT INTO Books (ISBNCode, Title, Author, Publisher, PublishYear, CopiesAvailable, RentalPrice, ActualPrice)
+VALUES
+    ('9780321125212', 'Clean Architecture: A Craftsman''s Guide to Software Structure and Design', 'Robert C. Martin', 'Prentice Hall', 2017, 8, 9.99, 49.99),
+    ('9780132350885', 'Clean Code: A Handbook of Agile Software Craftsmanship', 'Robert C. Martin', 'Prentice Hall', 2008, 10, 7.99, 24.99),
+    ('9780201616226', 'Design Patterns: Elements of Reusable Object-Oriented Software', 'Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides', 'Addison-Wesley Professional', 1994, 8, 14.99, 34.99),
+    ('9780321125213', 'Refactoring: Improving the Design of Existing Code', 'Martin Fowler', 'Addison-Wesley Professional', 1999, 12, 11.99, 29.99),
+    ('9780596007127', 'Head First Design Patterns', 'Eric Freeman, Elisabeth Robson, Bert Bates, Kathy Sierra', 'O''Reilly Media', 2004, 15, 16.99, 39.99),
+    ('9780201835954', 'The Pragmatic Programmer: Your Journey to Mastery', 'Andrew Hunt, David Thomas', 'Addison-Wesley Professional', 1999, 6, 18.99, 44.99),
+    ('9780135957058', 'Domain-Driven Design: Tackling Complexity in the Heart of Software', 'Eric Evans', 'Addison-Wesley Professional', 2003, 7, 20.99, 49.99),
+    ('9780321334878', 'Test Driven Development: By Example', 'Kent Beck', 'Addison-Wesley Professional', 2002, 9, 8.99, 24.99),
+    ('9780201633611', 'Agile Software Development, Principles, Patterns, and Practices', 'Robert C. Martin', 'Prentice Hall', 2002, 11, 14.99, 34.99),
+    ('9780201485678', 'Patterns of Enterprise Application Architecture', 'Martin Fowler', 'Addison-Wesley Professional', 2002, 10, 17.99, 44.99),
+    ('9780735619678', 'Code Complete: A Practical Handbook of Software Construction', 'Steve McConnell', 'Microsoft Press', 2004, 10, 19.99, 54.99),
+    ('9780201708425', 'The Mythical Man-Month: Essays on Software Engineering', 'Frederick P. Brooks Jr.', 'Addison-Wesley Professional', 1995, 5, 13.99, 34.99),
+    ('9780321482754', 'The Art of Unit Testing: with Examples in .NET', 'Roy Osherove', 'Manning Publications', 2009, 8, 15.99, 39.99),
+    ('9780132071482', 'Software Engineering: A Practitioner''s Approach', 'Roger S. Pressman', 'McGraw-Hill Education', 2009, 6, 20.99, 49.99),
+    ('9781118008188', 'Software Engineering: Modern Approaches', 'Eric J. Braude, Michael E. Bernstein', 'Wiley', 2010, 9, 18.99, 44.99),
+    ('9780201835952', 'Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation', 'Jez Humble, David Farley', 'Addison-Wesley Professional', 2010, 12, 24.99, 59.99),
+    ('9780470487753', 'Agile Estimating and Planning', 'Mike Cohn', 'Prentice Hall', 2005, 7, 17.99, 44.99),
+    ('9780132350886', 'The C Programming Language', 'Brian W. Kernighan, Dennis M. Ritchie', 'Prentice Hall', 1988, 4, 9.99, 24.99),
+    ('9780321714114', 'Effective Java', 'Joshua Bloch', 'Addison-Wesley Professional', 2008, 11, 18.99, 49.99),
+    ('9780321334899', 'Clean Agile: Back to Basics', 'Robert C. Martin', 'Prentice Hall', 2019, 15, 9.99, 29.99);
+
+DROP TABLE IF EXISTS Rentals CASCADE;
+CREATE TABLE Rentals (
+    RentalID INT NOT NULL PRIMARY KEY,
+    CustomerID INT,
+    ISBNCode VARCHAR(20),
+    RentalStartDate DATE,
+    DueDate DATE,
+    ReturnDate DATE,
+    RentalPrice DECIMAL(10, 2),
+    ActualPayment DECIMAL(10, 2),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (ISBNCode) REFERENCES Books(ISBNCode)
+);
+
+INSERT INTO Rentals (RentalID, CustomerID, ISBNCode, RentalStartDate, DueDate, ReturnDate, RentalPrice, ActualPayment)
+VALUES
+    (101, 1, '9780321125212', '2024-03-01', '2024-03-08', '2024-03-10', 9.99, 11.99), -- Returned 2 days late, additional fee added
+    (102, 2, '9780132350885', '2024-03-02', '2024-03-09', '2024-03-12', 7.99, 10.99), -- Returned 3 days late, additional fee added
+    (103, 3, '9780201616226', '2024-03-03', '2024-03-10', '2024-03-14', 14.99, 19.99),  -- Returned 4 days late, additional fee added
+    (104, 4, '9780321125213', '2024-03-04', '2024-03-11', '2024-03-12', 11.99, 11.99), -- Returned on time, no additional fee
+    (105, 5, '9780596007127', '2024-03-05', '2024-03-12', '2024-03-17', 16.99, 21.99), -- Returned 5 days late, additional fee added
+    (106, 6, '9780201835954', '2024-03-06', '2024-03-13', '2024-03-13', 18.99, 18.99), -- Returned on time, no additional fee
+    (107, 7, '9780135957058', '2024-03-07', '2024-03-14', '2024-03-18', 20.99, 25.99), -- Returned 4 days late, additional fee added
+    (108, 8, '9780321334878', '2024-03-08', '2024-03-15', '2024-03-15', 8.99, 8.99), -- Returned on time, no additional fee
+    (109, 9, '9780201633611', '2024-03-09', '2024-03-16', '2024-03-16', 14.99, 14.99), -- Returned on time, no additional fee
+    (110, 10, '9780201485678', '2024-03-10', '2024-03-17', '2024-03-17', 17.99, 17.99), -- Returned on time, no additional fee
+    (111, 1, '9780735619678', '2024-03-11', '2024-03-18', '2024-03-21', 19.99, 24.99), -- Returned 3 days late, additional fee added
+    (112, 2, '9780201708425', '2024-03-12', '2024-03-19', '2024-03-22', 13.99, 16.99), -- Returned 3 days late, additional fee added
+    (113, 3, '9780321482754', '2024-03-13', '2024-03-20', '2024-03-19', 13.99, 13.99), -- Returned 1 day early, no additional fee
+    (114, 4, '9780132071482', '2024-03-14', '2024-03-21', '2024-03-21', 15.99, 15.99), -- Returned on time, no additional fee
+    (115, 5, '9781118008188', '2024-03-15', '2024-03-22', NULL, 18.99, NULL), -- Not yet returned
+    (116, 6, '9780201835952', '2024-03-16', '2024-03-23', NULL, 24.99, NULL), -- Not yet returned
+    (117, 7, '9780470487753', '2024-03-17', '2024-03-24', NULL, 17.99, NULL), -- Not yet returned
+    (118, 8, '9780132350886', '2024-03-18', '2024-03-25', NULL, 9.99, NULL), -- Not yet returned
+    (119, 9, '9780321714114', '2024-03-19', '2024-03-26', NULL, 18.99, NULL), -- Not yet returned
+    (120, 10, '9780321334899', '2024-03-20', '2024-03-27', NULL, 9.99, NULL); -- Not yet returned
